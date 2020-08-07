@@ -1,0 +1,24 @@
+ll fac[maxn];// n!
+ll invfac[maxn]; // n!的inv
+ll invn[maxn]; //n的inv
+
+int init(){
+	int len=(int)(1e5+5);
+	fac[0]=fac[1]=invfac[0]=invfac[1]=invn[0]=invn[1]=1;
+	for(int i=2;i<=len;++i){
+		fac[i]=fac[i-1]*i%mod;
+		invn[i]=(mod-mod/i)*invn[mod%i]%mod;
+		invfac[i]=invfac[i-1]*invn[i]%mod;
+	}
+}
+
+ll C(ll n,ll m){
+	if(n>m) return 0;
+	if(n<0 || m<0) return 0;
+	ll res=fac[m];
+	res=res*invfac[m-n]%mod;
+	res=res*invfac[n]%mod;
+	return res;
+}
+
+// 先init（）, C(n,m) n在上面..
