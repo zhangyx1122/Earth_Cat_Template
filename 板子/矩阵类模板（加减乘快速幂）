@@ -1,0 +1,53 @@
+//矩阵类模板
+struct Matrix{
+    int n,m;
+    int a[maxn][maxm];
+    void clear(){
+        n=m=0;
+        memset(a,0,sizeof(a));
+    }
+    Matrix operator +(const Matrix &b) const {
+        Matrix tmp;
+        tmp.n=n;tmp.m=m;
+        for (int i=0;i<n;++i)
+            for(int j=0;j<m;++j)
+                tmp.a[i][j]=a[i][j]+b.a[i][j];
+        return tmp;
+    }
+    Matrix operator -(const Matrix &b)const{
+        Matrix tmp;
+        tmp.n=n;tmp.m=m;
+        for (int i=0;i<n;++i){
+        	for(int j=0;j<m;++j)
+                tmp.a[i][j]=a[i][j]-b.a[i][j];
+		}
+            
+        return tmp;
+    }
+    Matrix operator * (const Matrix &b) const{
+        Matrix tmp;
+        tmp.clear();
+        tmp.n=n;tmp.m=b.m;
+        for (int i=0;i<n;++i)
+            for(int j=0;j<b.m;++j)
+                for (int k=0;k<m;++k){
+                    tmp.a[i][j]+=a[i][k]*b.a[k][j];
+                    tmp.a[i][j]%=mod;
+                }
+        return tmp;
+    }
+    Matrix get(int x){//幂运算
+        Matrix E;
+        E.clear();
+        E.n=E.m=n;
+        for(int i=0;i<n;++i)
+            E.a[i][i]=1;
+        if(x==0) return E;
+        else if(x==1) return *this;
+        Matrix tmp=get(x/2);
+        tmp=tmp*tmp;
+        if(x%2) tmp=tmp*(*this);
+        return tmp;
+    }
+};
+//矩阵模板结束
