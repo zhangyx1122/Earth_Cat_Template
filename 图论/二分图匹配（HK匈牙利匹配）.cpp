@@ -1,4 +1,4 @@
-//大量使用了memset，但常数貌似很小？HDU6808跑了998ms（限制5000ms），然而这个代码不是HDU6808的
+//大量使用了memset，但常数貌似很小？HDU6808跑了998ms（限制5000ms），然而这个代int main()不是HDU6808的
 #include<bits/stdc++.h>
 using namespace std;
 
