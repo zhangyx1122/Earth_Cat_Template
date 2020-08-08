@@ -46,4 +46,4 @@ struct SuffixArray {
         }
     }
 
-} SA;
+} SA;   //字符串下标从一开始
