@@ -1,0 +1,16 @@
+需要软件：
+chocolaty   
+（choco使用：cmd命令行： choco install xx                                xx：软件名
+git
+tortoisgit
+
+tortoisgit使用方式：
+https://www.cnblogs.com/anayigeren/p/10177027.html
+
+如果添加ssh之后连接失败：
+（关闭vpn尝试）
+https://www.cnblogs.com/flora5/p/7152556.html 
+
+另：
+cmd和powershell都要以管理员身份运行 
+复制用insert不是cv
