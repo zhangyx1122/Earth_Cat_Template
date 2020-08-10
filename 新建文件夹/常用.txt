@@ -1,4 +1,0 @@
-git pull git@github.com:Hydrogenzyx/zjut11_template.git
-git add 常用.txt
-git add .
-git commit -m "提交了常用.txt"
