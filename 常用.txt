@@ -1,0 +1,3 @@
+git pull git@github.com:Hydrogenzyx/zjut11_template.git
+git add ≥£”√.txt
+git add .
