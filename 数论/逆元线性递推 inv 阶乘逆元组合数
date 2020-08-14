@@ -22,3 +22,4 @@ ll C(ll n,ll m){
 }
 
 // 先init（）, C(n,m) n在上面..
+//改init里面的len（为maxn的长度 注意不要数组越界）
