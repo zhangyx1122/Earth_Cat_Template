@@ -1,0 +1,8 @@
+markdown语法 ： （即该目录下的某md文件）
+https://www.zybuluo.com/codeep/note/163962
+
+部分公式无法显示：
+文件->偏好设置->Markdown扩展语法中 将 内联公式 勾上
+
+b站视频教程（20min 语速比较慢可以倍速）
+https://www.bilibili.com/video/BV1ox411y7Mc?from=search&seid=14956059594228669782
