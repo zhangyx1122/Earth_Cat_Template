@@ -6,7 +6,7 @@
 
 笛卡尔定理+韦达定理 （已）
 
-圆的反演的解法（待）
+圆的反演的解法（已）
 
 ### WA：1
 
@@ -539,6 +539,36 @@ int main(){
 <img src="aefaefergertbbyy3543.png" style="zoom:67%;" />
 
 
+
+**注意** ：反演的圆心不能直接算，要用圆上的坐标去算。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const double pi = acos(-1);
+
+int main() {
+    ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    int t;
+    cin >> t;
+    while (t--) {
+        double r1, r2;
+        int n;
+        cin >> r1 >> r2 >> n;
+        if (r1 < r2) swap(r1, r2);
+        double r = (1.0 / r2 - 1.0 / r1) / 4.0, ans = 0, h = 0,
+               d = (1.0 / r2 + 1.0 / r1) / 4.0;
+        for (int i = 1; i <= n; i++) {
+            double k = sqrt(d * d + h * h);
+            double g = pi * r * r / (k * k - r * r) / (k * k - r * r);
+            ans += g;
+            if (i & 1) h += 2.0 * r;
+            if (g < 1e-12) break;
+        }
+        cout << fixed << setprecision(5) << ans << endl;
+    }
+}
+```
 
 
 
