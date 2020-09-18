@@ -205,7 +205,89 @@ int main(){
 **主席树+set**
 
 对于每个删除的元素，将其插入到set中，查询的时候，查询[r+1,n+1]中第一个>=k的元素，再和set中第一个>=k的元素相比较，选择最小的
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
 
+const int N = 1 << 17;
+int tree[N << 5], lc[N << 5], rc[N << 5];
+int root[N], tot;
+int shu[N];
+
+int build(int l, int r) {
+    int num = ++tot;
+    tree[num] = l;
+    if (l == r) return num;
+    int mid = (l + r) >> 1;
+    lc[num] = build(l, mid);
+    rc[num] = build(mid + 1, r);
+    return num;
+}
+
+int update(int k, int l, int r, int x) {
+    int num = ++tot;
+    lc[num] = lc[k], rc[num] = rc[k];
+    if (l < r) {
+        int mid = (l + r) >> 1;
+        if (x <= mid)
+            lc[num] = update(lc[k], l, mid, x);
+        else
+            rc[num] = update(rc[k], mid + 1, r, x);
+        tree[num] = min(tree[lc[num]], tree[rc[num]]);
+    } else {
+        tree[num] = INT_MAX;
+    }
+    return num;
+}
+
+int query(int k, int l, int r, int ql, int qr) {
+    if (ql <= l && r <= qr) return tree[k];
+    if (qr < l || r < ql) return INT_MAX;
+    int mid = (l + r) >> 1;
+    return min(query(lc[k], l, mid, ql, qr), query(rc[k], mid + 1, r, ql, qr));
+}
+
+void init() { tot = 0; }
+
+int main() {
+    int t;
+    scanf("%d", &t);
+    while (t--) {
+        init();
+        int lastans = 0;
+        int n, m;
+        scanf("%d%d", &n, &m);
+        root[0] = build(1, N);
+        set<int> s;
+        for (int i = 1; i <= n; i++) {
+            scanf("%d", &shu[i]);
+            root[i] = update(root[i - 1], 1, N, shu[i]);
+        }
+        for (int i = 1; i <= m; i++) {
+            int a;
+
+            scanf("%d", &a);
+            if (a == 1) {
+                scanf("%d", &a);
+                a ^= lastans;
+                s.insert(shu[a]);
+            } else {
+                int b;
+                scanf("%d%d", &a, &b);
+                a ^= lastans;
+                b ^= lastans;
+                int ans = query(root[a], 1, N, b, N);
+                if (ans > n) ans = n + 1;
+                set<int>::iterator it = s.lower_bound(b);
+                if (it != s.end()) ans = min(ans, *it);
+                printf("%d\n", ans);
+                lastans = ans;
+            }
+        }
+    }
+}
+```
 
 
 ---
