@@ -4,7 +4,7 @@
 
 **赛后补题目标 ：**
 
-**B - array （hdu6703）**(待)
+**B - array （hdu6703）**(已)
 
 **E - huntian oy（hdu6706)**  (-)
 
