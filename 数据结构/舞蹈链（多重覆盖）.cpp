@@ -1,4 +1,3 @@
-```c++
 #include <bits/stdc++.h>
 using namespace std;
 struct DLX {
@@ -135,4 +134,3 @@ int main() {
     dlx.solve(ans);
     for (int i = 0; i < ans.size(); i++) cout << ans[i];
 }
-```
