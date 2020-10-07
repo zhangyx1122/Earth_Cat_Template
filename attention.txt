@@ -28,3 +28,5 @@ char数组开小了也可能报错tle 和 wa （
 pow() 的精度问题
 
 unique erase 先排序
+
+图论初始化
