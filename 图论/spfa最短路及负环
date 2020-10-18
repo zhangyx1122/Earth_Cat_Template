@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const ll N = 1e6 + 10;
+
+struct edge {
+    ll to, v;
+    edge() {}
+    edge(ll a, ll b) : to(a), v(b) {}
+};
+edge e[N];
+ll h[N], vis[N], nxt[N], inque[N], tot, d[N];
+
+void init(ll n, ll m) {
+    tot = 0;
+    for (int i = 0; i <= n; i++) {
+        h[i] = vis[i] = inque[i] = 0;
+    }
+    for (int i = 0; i <= m; i++) {
+        nxt[i] = 0;
+    }
+}
+
+void addedge(ll a, ll b, ll v) {
+    nxt[++tot] = h[a];
+    e[tot] = edge(b, v);
+    h[a] = tot;
+}
+
+bool spfa(ll s, ll n) {
+    for (int i = 0; i <= n; i++) d[i] = INT_MAX;
+    d[s] = 0;
+    queue<int> que;
+    que.push(s);
+    inque[s] = 1;
+    while (!que.empty()) {
+        int p = que.front();
+        que.pop();
+        vis[p] = 0;
+        for (int k = h[p]; k; k = nxt[k]) {
+            if (d[e[k].to] > d[p] + e[k].v) {
+                d[e[k].to] = d[p] + e[k].v;
+                if (!vis[e[k].to]) {
+                    inque[e[k].to]++;
+                    if (inque[e[k].to] > n) return 0;
+                    vis[e[k].to] = 1;
+                    que.push(e[k].to);
+                }
+            }
+        }
+    }
+    return 1;
+}
+
+int main() {
+    ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);
+    int t;
+    cin >> t;
+    while (t--) {
+        int n, m;
+        cin >> n >> m;
+        init(n, m * 2);
+        for (int i = 1; i <= m; i++) {
+            int a, b, c;
+            cin >> a >> b >> c;
+            addedge(a, b, c);
+            if (c >= 0) addedge(b, a, c);
+        }
+        if (spfa(1, n))
+            cout << "NO" << endl;
+        else
+            cout << "YES" << endl;
+    }
+}
