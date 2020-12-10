@@ -9,7 +9,7 @@
 > **bitset<每个bitset元素的长度(没有占满前面全部自动补0)> 元素**
 > **bitset内置转化函数：可将bitset转化为string,unsigned long,unsigned long long。**
 
-####构造
+#### 构造
 
 ```cpp
 	bitset<4> bitset1;　　//无参构造，长度为４，默认每一位为０
@@ -48,7 +48,7 @@
 
 [2019-2020 ICPC Asia Taipei-Hsinchu Regional Contest（H](https://blog.csdn.net/chitudexixi/article/details/109453360)
 
-###H
+### H
 
 ```cpp
 #include <bits/stdc++.h>
