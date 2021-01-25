@@ -61,7 +61,7 @@ ll getsum(int k,int l,int r,int ql,int qr){
 
 void init(int n){
     for(int i=0;i<=n;i++) g[i].clear();
-    for(int i=0;i<(n<<2);i++) tree[i]=lazy[i]=0;
+    for(int i=0;i<(N<<2);i++) tree[i]=lazy[i]=0;
     dfscnt=0;
 }
 
