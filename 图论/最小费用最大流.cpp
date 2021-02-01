@@ -4,8 +4,7 @@ typedef long long ll;
 
 struct Edge {
     ll from, to, cap, flow, cost;
-    Edge(ll u, ll v, ll c, ll f, ll w)
-        : from(u), to(v), cap(c), flow(f), cost(w) {}
+    Edge(ll u, ll v, ll c, ll f, ll w):from(u), to(v), cap(c), flow(f), cost(w) {}
 };
 
 struct MCMF {
@@ -26,6 +25,7 @@ struct MCMF {
     }
 
     void add_edge(ll from, ll to, ll cap, ll cost) {
+        from++,to++;//原板子无法使用0点，故修改
         edges.push_back(Edge(from, to, cap, 0, cost));
         edges.push_back(Edge(to, from, 0, 0, -cost));
         m = edges.size();
@@ -68,10 +68,10 @@ struct MCMF {
 
     //需要保证初始网络中没有负权圈
     ll MincostMaxflow(ll s, ll t, ll& cost) {
+        s++,t++;//原板子无法使用0点，故修改
         ll flow = 0;
         cost = 0;
-        while (BellmanFord(s, t, flow, cost))
-            ;
+        while (BellmanFord(s, t, flow, cost));
         return flow;
     }
 } mcmf;  //  若固定流量k，增广时在flow+a>=k的时候只增广k-flow单位的流量，然后终止程序
