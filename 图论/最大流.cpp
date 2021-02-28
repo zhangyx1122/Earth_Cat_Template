@@ -8,9 +8,9 @@ struct Edge {
 };
 
 struct Dinic {
-    static const ll maxn = 2000;
+    static const ll maxn = 10000;
     static const ll inf = 0x3f3f3f3f3f3f3f3f;
-    ll n, m, s, t;
+    ll N, M, S, T;
     vector<Edge> edges;
     vector<ll> G[maxn];
     bool vis[maxn];
@@ -20,17 +20,17 @@ struct Dinic {
     void AddEdge(ll from, ll to, ll cap) {
         edges.push_back(Edge(from, to, cap, 0));
         edges.push_back(Edge(to, from, 0, 0));
-        m = edges.size();
-        G[from].push_back(m - 2);
-        G[to].push_back(m - 1);
+        M = edges.size();
+        G[from].push_back(M - 2);
+        G[to].push_back(M - 1);
     }
 
     bool BFS() {
         memset(vis, 0, sizeof(vis));
         queue<ll> Q;
-        Q.push(s);
-        d[s] = 0;
-        vis[s] = 1;
+        Q.push(S);
+        d[S] = 0;
+        vis[S] = 1;
         while (!Q.empty()) {
             ll x = Q.front();
             Q.pop();
@@ -43,11 +43,11 @@ struct Dinic {
                 }
             }
         }
-        return vis[t];
+        return vis[T];
     }
 
     ll DFS(ll x, ll a) {
-        if (x == t || a == 0) return a;
+        if (x == T || a == 0) return a;
         ll flow = 0, f;
         for (ll& i = cur[x]; i < G[x].size(); i++) {
             Edge& e = edges[G[x][i]];
@@ -63,13 +63,25 @@ struct Dinic {
         return flow;
     }
 
-    ll Maxflow(ll s, ll t) {
-        this->s = s, this->t = t;
+    ll Maxflow(ll S, ll T) {
+        this->S = S, this->T = T;
         ll flow = 0;
         while (BFS()) {
             memset(cur, 0, sizeof(cur));
-            flow += DFS(s, inf);
+            flow += DFS(S, inf);
         }
         return flow;
     }
 } MF;
+
+int main() {
+	int n, m, S, T;
+	cin >> n >> m >> S >> T;
+	int u, v, c; 
+	for(int i = 0; i < m; ++ i) {
+		cin >> u >> v >> c;
+		MF.AddEdge(u, v, c);
+	}
+	
+	cout << MF.Maxflow(S, T) << endl;
+}
