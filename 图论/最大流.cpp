@@ -73,15 +73,3 @@ struct Dinic {
         return flow;
     }
 } MF;
-
-int main() {
-	int n, m, S, T;
-	cin >> n >> m >> S >> T;
-	int u, v, c; 
-	for(int i = 0; i < m; ++ i) {
-		cin >> u >> v >> c;
-		MF.AddEdge(u, v, c);
-	}
-	
-	cout << MF.Maxflow(S, T) << endl;
-}
