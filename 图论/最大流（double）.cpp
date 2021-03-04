@@ -11,7 +11,7 @@ struct Dinic {
 	int S, T;
 	int h[N], e[M], ne[M], idx;
 	double f[M];
-	int q[N], d[N], cur[N];
+	int q[N], d[N], cur[N]; // d 表示从源点开始走到该点的路径上所有边的容量的最小值 
 	
 	void AddEdge(int a, int b, double c)
 	{
@@ -74,5 +74,5 @@ struct Dinic {
 	}
 } MF;
 
-// ��init 
+// ÏÈinit 
 
