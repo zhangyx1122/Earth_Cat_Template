@@ -16,11 +16,21 @@ int getNum(int l) {
 }
 
 //左指针的分块，右指针的大小
-//有个奇数分块右指针从大到小，偶数分块右指针从小到大的优化 
 bool cmp (const node &a, const node & b) {
 	if(getNum(a.l) == getNum(b.l)) return a.r < b.r;
 	return a.l < b.l;
 }
+/* 奇偶优化
+struct node {
+  int l, r, id;
+  bool operator<(const node &x) const {
+    if (l / unit != x.l / unit) return l < x.l;
+    if ((l / unit) & 1)
+      return r <  x.r;  // 注意这里和下面一行不能写小于（大于）等于
+    return r > x.r;
+  }
+};
+*/
 
 void add(int x, int& res) {
 	if(cnt[x] == 0) res++;
