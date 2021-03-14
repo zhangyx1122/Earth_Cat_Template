@@ -1,9 +1,3 @@
-#include <bits/stdc++.h>
-
-using namespace std;
-typedef long long ll;
-const ll N = 1 << 20;
-
 ll ch[N][2], f[N], sum[N], val[N], tag[N], siz[N], siz2[N];
 
 inline void pushup(ll p) {
@@ -93,26 +87,4 @@ inline void cut(ll x, ll y) {
 
 void init(int n) {
     for (int i = 1; i <= n; i++) siz[i] = 1;
-}
-
-
-int main() {
-    ll n, m;
-    cin >> n >> m;
-    init(n);
-    while (m--) {
-        char c;
-        cin >> c;
-        ll a, b;
-        cin >> a >> b;
-        if (c == 'A') {
-            link(a, b);
-        } else {
-            cut(a, b);
-            ll siza = siz[a];
-            ll sizb = siz[b];
-            cout << siza * sizb << endl;
-            link(a, b);
-        }
-    }
 }
