@@ -10,7 +10,15 @@ int find(int a) {
     return pa[a] == a ? a : pa[a] = find(pa[a]);
 }
 
-int kruskal() {
+struct edge {
+    int from, to, l;
+};
+
+int w[N];
+edge e[N];
+vector<int> g[N];
+
+int kruskal(int n, int m) {
     int kcnt = n;
     init(n);
     sort(e + 1, e + 1 + m, [](edge a, edge b) { return a.l < b.l; });
