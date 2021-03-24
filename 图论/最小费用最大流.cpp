@@ -75,3 +75,4 @@ struct MCMF {
         return flow;
     }
 } mcmf;  //  若固定流量k，增广时在flow+a>=k的时候只增广k-flow单位的流量，然后终止程序
+//下标从0开始
