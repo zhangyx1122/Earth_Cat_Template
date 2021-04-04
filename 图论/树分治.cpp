@@ -8,7 +8,7 @@ struct edge {
     edge(int a, int b) : to(a), length(b) {}
 };
 
-int N, K;
+
 vector<edge> g[MAXN];
 
 bool centroid[MAXN];
@@ -45,10 +45,10 @@ pair<int, int> search_centroid(int v, int p, int t) {
     return res;
 }
 
-void init() {
+void init(int n) {
     memset(centroid, 0, sizeof(centroid));
     memset(subtree_size, 0, sizeof(subtree_size));
-    for (int i = 0; i <= N; i++) g[i].clear();
+    for (int i = 0; i <= n; i++) g[i].clear();
     ans = 0;
 }
 
@@ -56,7 +56,6 @@ int solve(int u) {
     compute_subtree_size(u, -1);
     int s = search_centroid(u, -1, subtree_size[u]).second;
     centroid[s] = 1;
-    int ans;
     for (int i = 0; i < g[s].size(); i++) {
         int v = g[s][i].to;
         if (centroid[v]) continue;
