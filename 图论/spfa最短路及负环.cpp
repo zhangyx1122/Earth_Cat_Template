@@ -1,3 +1,7 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N = 1 << 20;
 struct edge {
     ll to, len;
 };
@@ -20,7 +24,7 @@ bool spfa(ll s, ll n) {
                 d[x.to] = d[p] + x.len;
                 cnt[x.to] = cnt[p] + 1;
                 if (!vis[x.to]) {
-                    if (cnt[x.to] > n * 2) return 0;
+                    if (cnt[x.to] > n) return 0;
                     vis[x.to] = 1;
                     que.push(x.to);
                 }
