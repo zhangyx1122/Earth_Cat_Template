@@ -12,7 +12,7 @@ void sub(int &x, int y) {
     (x -= y) < 0 && (x += mod);
 }
 
-struct FWT {
+namespace FWT {
     int extend(int n) {
         int N = 1;
         for (; N < n; N <<= 1);
@@ -87,7 +87,7 @@ struct FWT {
         FWTxor(A, true);
         return A;
     }
-} fwt;
+};
 
 int main() {
     int n;
@@ -97,15 +97,15 @@ int main() {
     for (int i = 0; i < n; i++) scanf("%d", &a1[i]);
     for (int i = 0; i < n; i++) scanf("%d", &a2[i]);
     std::vector<int> A;
-    A = fwt.Or(a1, a2);
+    A = FWT::Or(a1, a2);
     for (int i = 0; i < n; i++) {
         printf("%d%c", A[i], " \n"[i == n - 1]);
     }
-    A = fwt.And(a1, a2);
+    A = FWT::And(a1, a2);
     for (int i = 0; i < n; i++) {
         printf("%d%c", A[i], " \n"[i == n - 1]);
     }
-    A = fwt.Xor(a1, a2);
+    A = FWT::Xor(a1, a2);
     for (int i = 0; i < n; i++) {
         printf("%d%c", A[i], " \n"[i == n - 1]);
     }
