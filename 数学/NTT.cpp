@@ -39,6 +39,8 @@ void ntt(ll *A, int type) {
 }
 
 void NTT(int n, int m) {
+    limit = 1;
+    L = 0;
     while (limit <= n + m) limit <<= 1, L++;
     for (int i = 0; i < limit; i++) r[i] = (r[i >> 1] >> 1) | ((i & 1) << (L - 1));
     ntt(a, 1), ntt(b, 1);
