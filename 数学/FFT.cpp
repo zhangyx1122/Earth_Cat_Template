@@ -42,6 +42,8 @@ void fft(Complex *A, int type) {
 }
 
 void FFT(int n, int m) {
+    limit = 1;
+    L = 0;
     while (limit <= n + m) limit <<= 1, L++;
     for (int i = 0; i < limit; i++) r[i] = (r[i >> 1] >> 1) | ((i & 1) << (L - 1));
     // 在原序列中 i 与 i/2 的关系是 ： i可以看做是i/2的二进制上的每一位左移一位得来
