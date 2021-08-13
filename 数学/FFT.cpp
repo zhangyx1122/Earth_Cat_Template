@@ -1,64 +1,63 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 
 using namespace std;
+typedef long long ll;
+const int N = 1e7 + 10;
 
-const int N = 300010;
-const double PI = acos(-1);
 
-int n, m;
+const double Pi = acos(-1.0);
 
 struct Complex {
     double x, y;
 
-    Complex operator+(const Complex &t) const {
-        return {x + t.x, y + t.y};
-    }
-
-    Complex operator-(const Complex &t) const {
-        return {x - t.x, y - t.y};
-    }
-
-    Complex operator*(const Complex &t) const {
-        return {x * t.x - y * t.y, x * t.y + y * t.x};
-    }
+    Complex(double xx = 0, double yy = 0) { x = xx, y = yy; }
 } a[N], b[N];
 
-int rev[N], bit, tot;
+Complex operator+(Complex _a, Complex _b) { return Complex(_a.x + _b.x, _a.y + _b.y); }
 
-void fft(Complex a[], int inv) {
-    for (int i = 0; i < tot; i++)
-        if (i < rev[i])
-            swap(a[i], a[rev[i]]);
-    for (int mid = 1; mid < tot; mid <<= 1) {
-        auto w1 = Complex({cos(PI / mid), inv * sin(PI / mid)});
-        for (int i = 0; i < tot; i += mid * 2) {
-            auto wk = Complex({1, 0});
-            for (int j = 0; j < mid; j++, wk = wk * w1) {
-                auto x = a[i + j], y = wk * a[i + j + mid];
-                a[i + j] = x + y, a[i + j + mid] = x - y;
+Complex operator-(Complex _a, Complex _b) { return Complex(_a.x - _b.x, _a.y - _b.y); }
+
+Complex operator*(Complex _a, Complex _b) {
+    return Complex(_a.x * _b.x - _a.y * _b.y, _a.x * _b.y + _a.y * _b.x);
+} //不懂的看复数的运算那部分
+
+int L, r[N];
+int limit = 1;
+
+void fft(Complex *A, int type) {
+    for (int i = 0; i < limit; i++)
+        if (i < r[i]) swap(A[i], A[r[i]]); //求出要迭代的序列
+    for (int mid = 1; mid < limit; mid <<= 1) { //待合并区间的长度的一半
+        Complex Wn(cos(Pi / mid), type * sin(Pi / mid)); //单位根
+        for (int R = mid << 1, j = 0; j < limit; j += R) { //R是区间的长度，j表示前已经到哪个位置了
+            Complex w(1, 0); //幂
+            for (int k = 0; k < mid; k++, w = w * Wn) { //枚举左半部分
+                Complex x = A[j + k], y = w * A[j + mid + k]; //蝴蝶效应
+                A[j + k] = x + y;
+                A[j + mid + k] = x - y;
+
             }
         }
     }
 }
 
-void FFT() {
-    bit = 0;
-    while ((1 << bit) < n + m + 1) bit++;
-    tot = 1 << bit;
-    for (int i = 0; i < tot; i++)
-        rev[i] = (rev[i >> 1] >> 1) | ((i & 1) << (bit - 1));
+void FFT(int n, int m) {
+    while (limit <= n + m) limit <<= 1, L++;
+    for (int i = 0; i < limit; i++) r[i] = (r[i >> 1] >> 1) | ((i & 1) << (L - 1));
+    // 在原序列中 i 与 i/2 的关系是 ： i可以看做是i/2的二进制上的每一位左移一位得来
+    // 那么在反转后的数组中就需要右移一位，同时特殊处理一下奇数
     fft(a, 1), fft(b, 1);
-    for (int i = 0; i < tot; i++) a[i] = a[i] * b[i];
+    for (int i = 0; i <= limit; i++) a[i] = a[i] * b[i];
     fft(a, -1);
+    for (int i = 0; i <= n + m; i++) a[i].x /= limit;
 }
 
 int main() {
-    scanf("%d%d", &n, &m);
-    for (int i = 0; i <= n; i++) scanf("%lf", &a[i].x);
-    for (int i = 0; i <= m; i++) scanf("%lf", &b[i].x);
-    FFT();
-    for (int i = 0; i <= n + m; i++)
-        printf("%d ", (int) (a[i].x / tot + 0.5));
-
+    int n, m;
+    cin >> n >> m;
+    for (int i = 0; i <= n; i++) cin >> a[i].x;
+    for (int i = 0; i <= m; i++) cin >> b[i].x;
+    FFT(n, m);
+    for (int i = 0; i <= n + m; i++) cout << (int) (a[i].x + 0.5) << ' ';
     return 0;
 }
