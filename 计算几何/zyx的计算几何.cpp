@@ -1,6 +1,13 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+typedef long long ll;
+const int N = 1e6 + 10;
+
 const double eps = 1e-9;
 const double PI = acos(-1.0);
-
+const double dinf = 1e99;
+const ll inf = 0x3f3f3f3f3f3f3f3f;
 struct Line;
 
 struct Point {
@@ -37,7 +44,9 @@ struct Point {
     }
 };
 
-Point normal(const Point &a) { return Point(-a.y, a.x); }
+double norm(const Point &p) { return p.x * p.x + p.y * p.y; }
+
+Point orth(const Point &a) { return Point(-a.y, a.x); }
 
 double dist(const Point &a, const Point &b) {
     return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
@@ -56,13 +65,14 @@ struct Line {
 
 };
 
-struct circle {
+
+struct Circle {
     Point o;
     double r;
 
-    circle() {}
+    Circle() {}
 
-    circle(Point P, double R = 0) { o = P, r = R; }
+    Circle(Point P, double R = 0) { o = P, r = R; }
 };
 
 double length(const Point &p) {
@@ -81,13 +91,14 @@ istream &operator>>(istream &in, Point &a) {
     return in;
 }
 
-double dot(const Point &a, const Point &b) {
-    return a.x * b.x + a.y * b.y;
+ostream &operator<<(ostream &out, Point &a) {
+    out << fixed << setprecision(10) << a.x << ' ' << a.y;
+    return out;
 }
 
-double det(const Point &a, const Point &b) {
-    return a.x * b.y - a.y * b.x;
-}
+double dot(const Point &a, const Point &b) { return a.x * b.x + a.y * b.y; }
+
+double det(const Point &a, const Point &b) { return a.x * b.y - a.y * b.x; }
 
 int sgn(const double &x) { return fabs(x) < eps ? 0 : (x > 0 ? 1 : -1); }
 
@@ -132,16 +143,13 @@ int andrew(Point *point, Point *convex, int n) {
     return top;
 }
 
-double slope(const Point &a, const Point &b) {
-    return (a.y - b.y) / (a.x - b.x);
-}
+double slope(const Point &a, const Point &b) { return (a.y - b.y) / (a.x - b.x); }
 
-double slope(const Line &a) {
-    return slope(a.s, a.t);
-}
+double slope(const Line &a) { return slope(a.s, a.t); }
 
 Point ll_intersection(const Line &a, const Line &b) {
     double s1 = det(Point(a), b.s - a.s), s2 = det(Point(a), b.t - a.s);
+    if (sgn(s1) == 0 && sgn(s2) == 0) return a.s;
     return (b.s * s2 - b.t * s1) / (s2 - s1);
 }
 
@@ -173,6 +181,17 @@ int ss_cross(const Line &a, const Line &b, Point &p) {
     return 0;
 }
 
+
+int ccw(const Point &a, Point b, Point c) {
+    b = b - a, c = c - a;
+    if (sgn(det(b, c)) > 0) return +1;  // "COUNTER_CLOCKWISE"
+    if (sgn(det(b, c)) < 0) return -1; // "CLOCKWISE"
+    if (sgn(dot(b, c)) < 0) return +2;      // "ONLINE_BACK"
+    if (sgn(norm(b) - norm(c)) < 0) return -2;  // "ONLINE_FRONT"
+    return 0;                         // "ON_SEGMENT"
+}
+
+
 Point project(const Line &l, const Point &p) {
     Point base(l);
     double r = dot(base, p - l.s) / sqr(length(base));
@@ -192,27 +211,55 @@ double lp_dist(const Line &l, const Point &p) {
     return abs(det(x, z) / length(z));//面积除以底边长
 }
 
-int lc_cross(const Line &l, const Point &a, const double &r, pair<Point, Point> &ans) {
-    int num = 0;
+int cl_cross(const Circle &c, const Line &l, pair<Point, Point> &ans) {
+    Point a = c.o;
+    double r = c.r;
     Point pr = project(l, a);
     double dis = dist(pr, a);
     double tmp = r * r - dis * dis;
-    if (sgn(tmp) == 1) num = 2;
-    else if (sgn(tmp) == 0) num = 1;
-    else return 0;
-    double base = sqrt(r * r - dis * dis);
-    Point e(l);
-    e.standardize();
-    e = e * base;
-    ans = make_pair(pr + e, pr - e);
-    return num;
+    if (sgn(tmp) == 1) {
+        double base = sqrt(max(0.0, r * r - dis * dis));
+        Point e(l);
+        e.standardize();
+        e = e * base;
+        ans = make_pair(pr + e, pr - e);
+        return 2;
+    } else if (sgn(tmp) == 0) {
+        ans = make_pair(pr, pr);
+        return 1;
+    } else return 0;
 }
 
-int cc_cross(const Point &c1, const double &r1, const Point &c2, const double &r2, pair<Point, Point> &ans) {
+int intersectCS(Circle c, Line l) {//交点个数，下面cs_cross用到
+    if (sgn(norm(project(l, c.o) - c.o) - c.r * c.r) > 0) return 0;
+    double d1 = length(c.o - l.s), d2 = length(c.o - l.t);
+    if (sgn(d1 - c.r) <= 0 && sgn(d2 - c.r) <= 0) return 0;
+    if ((sgn(d1 - c.r) < 0 && sgn(d2 - c.r) > 0) || (sgn(d1 - c.r) > 0 && sgn(d2 - c.r) < 0)) return 1;
+    Point h = project(l, c.o);
+    if (dot(l.s - h, l.t - h) < 0) return 2;
+    return 0;
+}
+
+int cs_cross(Circle c, Line s, pair<Point, Point> &ans) {//圆和线段交点
+    Line l(s);
+    int num = cl_cross(c, l, ans);
+    int res = intersectCS(c, s);
+    if (res == 2) return 2;
+    if (num > 1) {
+        if (dot(l.s - ans.first, l.t - ans.first) > 0) swap(ans.first, ans.second);
+        ans.second = ans.first;
+    }
+    return res;
+}
+
+
+int cc_cross(const Circle &cir1, const Circle &cir2, pair<Point, Point> &ans) {
+    const Point &c1 = cir1.o, &c2 = cir2.o;
+    const double &r1 = cir1.r, &r2 = cir2.r;
     double x1 = c1.x, x2 = c2.x, y1 = c1.y, y2 = c2.y;
     double d = length(c1 - c2);
-    if (sgn(fabs(r1 - r2) - d) > 0) return -1;  //内含
-    if (sgn(r1 + r2 - d) < 0) return 0; //相离
+    if (sgn(fabs(r1 - r2) - d) > 0) return 0;  //内含
+    if (sgn(r1 + r2 - d) < 0) return 4; //相离
     double a = r1 * (x1 - x2) * 2, b = r1 * (y1 - y2) * 2, c = r2 * r2 - r1 * r1 - d * d;
     double p = a * a + b * b, q = -a * c * 2, r = c * c - b * b;
 
@@ -224,7 +271,8 @@ int cc_cross(const Point &c1, const double &r1, const Point &c2, const double &r
         Point p0(x1 + r1 * cosa, y1 + r1 * sina);
         if (sgn(dist(p0, c2) - r2)) p0.y = y1 - r1 * sina;
         ans = pair<Point, Point>(p0, p0);
-        return 1;
+        if (sgn(r1 + r2 - d) == 0) return 3;    //外切
+        else return 1;  //内切
     }
     //Two Intersections
     double delta = sqrt(q * q - p * r * 4);
@@ -238,7 +286,7 @@ int cc_cross(const Point &c1, const double &r1, const Point &c2, const double &r
     if (sgn(dist(p2, c2) - r2)) p2.y = y1 - r1 * sinb;
     if (p1 == p2) p1.y = y1 - r1 * sina;
     ans = pair<Point, Point>(p1, p2);
-    return 2;
+    return 2;   //  相交
 }
 
 Point lp_sym(const Line &l, const Point &p) {
@@ -255,7 +303,7 @@ double alpha(const Point &t1, const Point &t2) {
 
 int pip(const Point *P, const int &n, const Point &a) {//【射线法】判断点A是否在任意多边形Poly以内
     int cnt = 0;
-    int tmp;
+    double tmp;
     for (int i = 1; i <= n; ++i) {
         int j = i < n ? i + 1 : 1;
         if (sp_on(Line(P[i], P[j]), a))return 2;//点在多边形上
@@ -303,8 +351,33 @@ int pp_judge(Point *A, int n, Point *B, int m) {//【判断多边形A与多边�
 
 double area(Point *P, int n) {//【任意多边形P的面积】
     double S = 0;
-    for (int i = 1; i <= n; i++) S += det(P[i], P[i < n ? i + 1 : 1]);
-    return S / 2.0;
+    for (int i = 0; i < n; i++) S += det(P[i], P[(i + 1) % n]);
+    return S * 0.5;
+}
+
+double pc_area(Point *p, int n, const Circle &c) {
+    if (n < 3) return 0;
+    function<double(Circle, Point, Point)> dfs = [&](Circle c, Point a, Point b) {
+        Point va = c.o - a, vb = c.o - b;
+        double f = det(va, vb), res = 0;
+        if (sgn(f) == 0) return res;
+        if (sgn(max(length(va), length(vb)) - c.r) <= 0) return f;
+        Point d(dot(va, vb), det(va, vb));
+        if (sgn(sp_dist(Line(a, b), c.o) - c.r) >= 0) return c.r * c.r * atan2(d.y, d.x);
+        pair<Point, Point> u;
+        int cnt = cs_cross(c, Line(a, b), u);
+        if (cnt == 0) return res;
+        if (cnt > 1 && sgn(dot(u.second - u.first, a - u.first)) > 0) swap(u.first, u.second);
+        res += dfs(c, a, u.first);
+        if (cnt == 2) res += dfs(c, u.first, u.second) + dfs(c, u.second, b);
+        else if (cnt == 1) res += dfs(c, u.first, b);
+        return res;
+    };
+    double res = 0;
+    for (int i = 0; i < n; i++) {
+        res += dfs(c, p[i], p[(i + 1) % n]);
+    }
+    return res * 0.5;
 }
 
 Line Q[N];
@@ -350,15 +423,25 @@ int mincowski(Point *P1, int n, Point *P2, int m, Point *V) {//【闵可夫斯�
     return t;
 }
 
-circle getcircle(const Point &A, const Point &B, const Point &C) {//【三点确定一圆】向量垂心法
+Circle external_circle(const Point &A, const Point &B, const Point &C) {//【三点确定一圆】向量垂心法
     Point P1 = (A + B) * 0.5, P2 = (A + C) * 0.5;
-    Line R1 = Line(P1, P1 + normal(B - A));
-    Line R2 = Line(P2, P2 + normal(C - A));
-    circle O;
+    Line R1 = Line(P1, P1 + orth(B - A));
+    Line R2 = Line(P2, P2 + orth(C - A));
+    Circle O;
     O.o = ll_intersection(R1, R2);
     O.r = length(A - O.o);
     return O;
 }
+
+Circle internal_circle(const Point &A, const Point &B, const Point &C) {
+    double a = dist(B, C), b = dist(A, C), c = dist(A, B);
+    double s = (a + b + c) / 2;
+    double S = sqrt(max(0.0, s * (s - a) * (s - b) * (s - c)));
+    double r = S / s;
+
+    return Circle((A * a + B * b + C * c) / (a + b + c), r);
+}
+
 
 struct ConvexHull {
 
@@ -397,7 +480,7 @@ struct ConvexHull {
 
     inline void insert(Point P) {
         if (PIP(P))return;//如果点P已经在凸壳上或凸包里就不插入了
-        set<Point>::iterator tmp = s.lower_bound(Point(P.x, -inf));
+        set<Point>::iterator tmp = s.lower_bound(Point(P.x, -dinf));
         if (tmp != s.end() && sgn(tmp->x - P.x) == 0)s.erase(tmp);//特判横坐标相等的点要去掉
         s.insert(P);
         set<Point>::iterator it = s.find(P), p = it;
@@ -417,20 +500,119 @@ struct ConvexHull {
     }
 } up(1), down(-1);
 
-int PIC(circle C, Point a) { return sgn(length(a - C.o) - C.r) <= 0; }//判断点A是否在圆C内
+int PIC(Circle C, Point a) { return sgn(length(a - C.o) - C.r) <= 0; }//判断点A是否在圆C内
 void Random(Point *P, int n) { for (int i = 0; i < n; ++i)swap(P[i], P[(rand() + 1) % n]); }//随机一个排列
-circle min_circle(Point *P, int n) {//【求点集P的最小覆盖圆】 O(n)
+Circle min_circle(Point *P, int n) {//【求点集P的最小覆盖圆】 O(n)
 //  random_shuffle(P,P+n);
     Random(P, n);
-    circle C = circle(P[0], 0);
+    Circle C = Circle(P[0], 0);
     for (int i = 1; i < n; ++i)
         if (!PIC(C, P[i])) {
-            C = circle(P[i], 0);
+            C = Circle(P[i], 0);
             for (int j = 0; j < i; ++j)
                 if (!PIC(C, P[j])) {
                     C.o = (P[i] + P[j]) * 0.5, C.r = length(P[j] - C.o);
-                    for (int k = 0; k < j; ++k) if (!PIC(C, P[k])) C = getcircle(P[i], P[j], P[k]);
+                    for (int k = 0; k < j; ++k) if (!PIC(C, P[k])) C = external_circle(P[i], P[j], P[k]);
                 }
         }
     return C;
+}
+
+
+int temp[N];
+
+double closest_point(Point *p, int n) {
+    function<double(int, int)> merge = [&](int l, int r) {
+        double d = dinf;
+        if (l == r) return d;
+        if (l + 1 == r) return dist(p[l], p[r]);
+        int mid = (l + r) >> 1;
+        double d1 = merge(l, mid);
+        double d2 = merge(mid + 1, r);
+        d = min(d1, d2);
+        int i, j, k = 0;
+        for (i = l; i <= r; i++) {
+            if (sgn(abs(p[mid].x - p[i].x) - d) <= 0)
+                temp[k++] = i;
+
+        }
+        sort(temp, temp + k, [&](const int &a, const int &b) {
+            return sgn(p[a].y - p[b].y) < 0;
+        });
+        for (i = 0; i < k; i++) {
+            for (j = i + 1; j < k && sgn(p[temp[j]].y - p[temp[i]].y - d) <= 0; j++) {
+                double d3 = dist(p[temp[i]], p[temp[j]]);
+                d = min(d, d3);
+            }
+        }
+        return d;
+    };
+    sort(p, p + n, [&](const Point &a, const Point &b) {
+        if (sgn(a.x - b.x) == 0) return sgn(a.y - b.y) < 0;
+        else return sgn(a.x - b.x) < 0;
+    });
+    return merge(0, n - 1);
+}
+
+int tangent(const Circle &c1, const Point &p2, pair<Point, Point> &ans) { //圆和点切线
+    Point tmp = c1.o - p2;
+    int sta;
+    if (sgn(norm(tmp) - c1.r * c1.r) < 0) return 0;
+    else if (sgn(norm(tmp) - c1.r * c1.r) == 0) sta = 1;
+    else sta = 2;
+    Circle c2 = Circle(p2, sqrt(max(0.0, norm(tmp) - c1.r * c1.r)));
+    cc_cross(c1, c2, ans);
+    return sta;
+}
+
+int tangent(Circle c1, Circle c2, vector<Line> &ans) { //圆和点切线
+    ans.clear();
+    if (sgn(c1.r - c2.r) < 0) swap(c1, c2);
+    double g = norm(c1.o - c2.o);
+    if (sgn(g) == 0) return 0;
+    Point u = (c2.o - c1.o) / sqrt(g);
+    Point v = orth(u);
+    for (int s = 1; s >= -1; s -= 2) {
+        double h = (c1.r + s * c2.r) / sqrt(g);
+        if (sgn(1 - h * h) == 0) {
+            ans.push_back(Line(c1.o + u * c1.r, c1.o + (u + v) * c1.r));
+        } else if (sgn(1 - h * h) >= 0) {
+            Point uu = u * h, vv = v * sqrt(1 - h * h);
+            ans.push_back(Line(c1.o + (uu + vv) * c1.r, c2.o - (uu + vv) * c2.r * s));
+            ans.push_back(Line(c1.o + (uu - vv) * c1.r, c2.o - (uu - vv) * c2.r * s));
+        }
+    }
+
+    return ans.size();
+}
+
+double areaofCC(Circle c1, Circle c2) { //两圆面积交
+    if (c1.r > c2.r) swap(c1, c2);
+    double nor = norm(c1.o - c2.o);
+    double dist = sqrt(max(0.0, nor));
+
+    if (sgn(c1.r + c2.r - dist) <= 0) return 0;
+
+    if (sgn(dist + c1.r - c2.r) <= 0) return c1.r * c1.r * PI;
+
+    double val;
+    val = (nor + c1.r * c1.r - c2.r * c2.r) / (2 * c1.r * dist);
+    val = max(val, -1.0), val = min(val, 1.0);
+    double theta1 = acos(val);
+    val = (nor + c2.r * c2.r - c1.r * c1.r) / (2 * c2.r * dist);
+    val = max(val, -1.0), val = min(val, 1.0);
+    double theta2 = acos(val);
+    return (theta1 - sin(theta1 + theta1) * 0.5) * c1.r * c1.r + (theta2 - sin(theta2 + theta2) * 0.5) * c2.r * c2.r;
+}
+
+
+int convexCut(Point *p, Point *ans, int n, Line l) {
+    int top = 0;
+    for (int i = 0; i < n; i++) {
+        Point a = p[i], b = p[(i + 1) % n];
+        if (ccw(l.s, l.t, a) != -1) ans[top++] = a;
+        if (ccw(l.s, l.t, a) * ccw(l.s, l.t, b) < 0)
+            ans[top++] = ll_intersection(Line(a, b), l);
+    }
+    return top;
 }
