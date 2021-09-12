@@ -616,3 +616,16 @@ int convexCut(Point *p, Point *ans, int n, Line l) {
     }
     return top;
 }
+
+double SphereCross(double d, double r1, double r2) {
+    if (r1 < r2) swap(r1, r2);
+    if (sgn(d - r1 - r2) >= 0) return 0;
+    if (sgn(d + r2 - r1) <= 0) return 4.0 / 3 * PI * r2 * r2 * r2;
+    double co = (r1 * r1 + d * d - r2 * r2) / (2.0 * d * r1);
+    double h = r1 * (1 - co);
+    double ans = (1.0 / 3) * PI * (3.0 * r1 - h) * h * h;
+    co = (r2 * r2 + d * d - r1 * r1) / (2.0 * d * r2);
+    h = r2 * (1 - co);
+    ans += (1.0 / 3) * PI * (3.0 * r2 - h) * h * h;
+    return ans;
+}
