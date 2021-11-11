@@ -39,19 +39,24 @@ struct Point {
         return abs(x - a.x) + abs(y - a.y) < eps;
     }
 
+    // 标准化，转化为膜长为1
     void standardize() {
         *this = *this / sqrt(x * x + y * y);
     }
 };
 
+
 double norm(const Point &p) { return p.x * p.x + p.y * p.y; }
 
+//逆时针转90度
 Point orth(const Point &a) { return Point(-a.y, a.x); }
 
+//两点间距离
 double dist(const Point &a, const Point &b) {
     return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 }
 
+//两点间距离的平方
 double dist2(const Point &a, const Point &b) {
     return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
 }
@@ -75,10 +80,12 @@ struct Circle {
     Circle(Point P, double R = 0) { o = P, r = R; }
 };
 
+//向量的膜长
 double length(const Point &p) {
     return sqrt(p.x * p.x + p.y * p.y);
 }
 
+//线段的长度
 double length(const Line &l) {
     Point p(l);
     return length(p);
@@ -96,32 +103,38 @@ ostream &operator<<(ostream &out, Point &a) {
     return out;
 }
 
+//点积
 double dot(const Point &a, const Point &b) { return a.x * b.x + a.y * b.y; }
 
+//叉积
 double det(const Point &a, const Point &b) { return a.x * b.y - a.y * b.x; }
 
+//正负判断
 int sgn(const double &x) { return fabs(x) < eps ? 0 : (x > 0 ? 1 : -1); }
 
+//平方
 double sqr(const double &x) { return x * x; }
 
+//将向量a逆时针旋转ang（弧度制）
 Point rotate(const Point &a, const double &ang) {
     double x = cos(ang) * a.x - sin(ang) * a.y;
     double y = sin(ang) * a.x + cos(ang) * a.y;
     return {x, y};
 }
 
-//点在线段上 <=0 包含端点
+//点p在线段seg上，<=0则包含端点
 bool sp_on(const Line &seg, const Point &p) {
     Point a = seg.s, b = seg.t;
     return !sgn(det(p - a, b - a)) && sgn(dot(p - a, p - b)) <= 0;
 }
 
+//点p在直线line上
 bool lp_on(const Line &line, const Point &p) {
     Point a = line.s, b = line.t;
     return !sgn(det(p - a, b - a));
 }
 
-//等于不包含共线
+//凸包，下标从0开始，<=0则凸包中不包含共线点
 int andrew(Point *point, Point *convex, int n) {
     sort(point, point + n, [](Point a, Point b) {
         if (a.x != b.x) return a.x < b.x;
@@ -143,16 +156,20 @@ int andrew(Point *point, Point *convex, int n) {
     return top;
 }
 
+//斜率
 double slope(const Point &a, const Point &b) { return (a.y - b.y) / (a.x - b.x); }
 
+//斜率
 double slope(const Line &a) { return slope(a.s, a.t); }
 
+//两直线的焦点
 Point ll_intersection(const Line &a, const Line &b) {
     double s1 = det(Point(a), b.s - a.s), s2 = det(Point(a), b.t - a.s);
     if (sgn(s1) == 0 && sgn(s2) == 0) return a.s;
     return (b.s * s2 - b.t * s1) / (s2 - s1);
 }
 
+//两线段交点p，返回0为无交点，2为交点为端点，1为相交
 int ss_cross(const Line &a, const Line &b, Point &p) {
     int d1 = sgn(det(a.t - a.s, b.s - a.s));
     int d2 = sgn(det(a.t - a.s, b.t - a.s));
@@ -181,7 +198,7 @@ int ss_cross(const Line &a, const Line &b, Point &p) {
     return 0;
 }
 
-
+//两向量直接的相对位置关系，含义见英文注释
 int ccw(const Point &a, Point b, Point c) {
     b = b - a, c = c - a;
     if (sgn(det(b, c)) > 0) return +1;  // "COUNTER_CLOCKWISE"
@@ -192,12 +209,14 @@ int ccw(const Point &a, Point b, Point c) {
 }
 
 
+//点p在线l上的投影位置
 Point project(const Line &l, const Point &p) {
     Point base(l);
     double r = dot(base, p - l.s) / sqr(length(base));
     return l.s + (base * r);
 }
 
+//线段l和点p的距离
 double sp_dist(const Line &l, const Point &p) {
     if (l.s == l.t) return dist(l.s, p);
     Point x = p - l.s, y = p - l.t, z = l.t - l.s;
@@ -206,11 +225,13 @@ double sp_dist(const Line &l, const Point &p) {
     return abs(det(x, z) / length(z));//面积除以底边长
 }
 
+//直线l和点p的距离
 double lp_dist(const Line &l, const Point &p) {
     Point x = p - l.s, y = p - l.t, z = l.t - l.s;
     return abs(det(x, z) / length(z));//面积除以底边长
 }
 
+//圆c和直线l的交点，返回值为交点的数量，ans为交点位置
 int cl_cross(const Circle &c, const Line &l, pair<Point, Point> &ans) {
     Point a = c.o;
     double r = c.r;
@@ -230,7 +251,8 @@ int cl_cross(const Circle &c, const Line &l, pair<Point, Point> &ans) {
     } else return 0;
 }
 
-int intersectCS(Circle c, Line l) {//交点个数，下面cs_cross用到
+//圆c和线段l交点个数，下面cs_cross用到
+int intersectCS(Circle c, Line l) {
     if (sgn(norm(project(l, c.o) - c.o) - c.r * c.r) > 0) return 0;
     double d1 = length(c.o - l.s), d2 = length(c.o - l.t);
     if (sgn(d1 - c.r) <= 0 && sgn(d2 - c.r) <= 0) return 0;
@@ -240,7 +262,8 @@ int intersectCS(Circle c, Line l) {//交点个数，下面cs_cross用到
     return 0;
 }
 
-int cs_cross(Circle c, Line s, pair<Point, Point> &ans) {//圆和线段交点
+//圆和线段交点，返回交点数量
+int cs_cross(Circle c, Line s, pair<Point, Point> &ans) {
     Line l(s);
     int num = cl_cross(c, l, ans);
     int res = intersectCS(c, s);
@@ -252,7 +275,7 @@ int cs_cross(Circle c, Line s, pair<Point, Point> &ans) {//圆和线段交点
     return res;
 }
 
-
+//两圆交点，位置关系见注释
 int cc_cross(const Circle &cir1, const Circle &cir2, pair<Point, Point> &ans) {
     const Point &c1 = cir1.o, &c2 = cir2.o;
     const double &r1 = cir1.r, &r2 = cir2.r;
@@ -289,10 +312,12 @@ int cc_cross(const Circle &cir1, const Circle &cir2, pair<Point, Point> &ans) {
     return 2;   //  相交
 }
 
+//点p关于直线l的对称点
 Point lp_sym(const Line &l, const Point &p) {
     return p + (project(l, p) - p) * 2;
 }
 
+//返回两向量的夹角
 double alpha(const Point &t1, const Point &t2) {
     double theta;
     theta = atan2((double) t2.y, (double) t2.x) - atan2((double) t1.y, (double) t1.x);
@@ -301,7 +326,8 @@ double alpha(const Point &t1, const Point &t2) {
     return theta;
 }
 
-int pip(const Point *P, const int &n, const Point &a) {//【射线法】判断点A是否在任意多边形Poly以内
+//【射线法】判断点A是否在任意多边形Poly以内，下标从1开始（为保险起见，可以在判断前将所有点随机旋转一个角度防止被卡）
+int pip(const Point *P, const int &n, const Point &a) {
     int cnt = 0;
     double tmp;
     for (int i = 1; i <= n; ++i) {
@@ -313,11 +339,13 @@ int pip(const Point *P, const int &n, const Point &a) {//【射线法】判断�
     return cnt & 1;//穿过奇数次则在多边形以内
 }
 
-bool pip_convex_jud(const Point &a, const Point &L, const Point &R) {//判断AL是否在AR右边
+//判断AL是否在AR右边
+bool pip_convex_jud(const Point &a, const Point &L, const Point &R) {
     return sgn(det(L - a, R - a)) > 0;//必须严格以内
 }
 
-bool pip_convex(const Point *P, const int &n, const Point &a) {//【二分法】判断点A是否在凸多边形Poly以内
+//【二分法】判断点A是否在凸多边形Poly以内，下标从0开始
+bool pip_convex(const Point *P, const int &n, const Point &a) {
     //点按逆时针给出
     if (pip_convex_jud(P[0], a, P[1]) || pip_convex_jud(P[0], P[n - 1], a)) return 0;//在P[0_1]或P[0_n-1]外
     if (sp_on(Line(P[0], P[1]), a) || sp_on(Line(P[0], P[n - 1]), a)) return 2;//在P[0_1]或P[0_n-1]上
@@ -336,7 +364,8 @@ bool pip_convex(const Point *P, const int &n, const Point &a) {//【二分法】
 // 这种排序准则也是为了保证水平和垂直情况的判断正确)，这样相邻的两个点就是在线段上相邻的两交点，如果任意相邻两点的中点也在多边形内，
 // 则该线段一定在多边形内。
 
-int pp_judge(Point *A, int n, Point *B, int m) {//【判断多边形A与多边形B是否相离】
+//【判断多边形A与多边形B是否相离】
+int pp_judge(Point *A, int n, Point *B, int m) {
     for (int i1 = 1; i1 <= n; ++i1) {
         int j1 = i1 < n ? i1 + 1 : 1;
         for (int i2 = 1; i2 <= m; ++i2) {
@@ -349,12 +378,14 @@ int pp_judge(Point *A, int n, Point *B, int m) {//【判断多边形A与多边�
     return 1;
 }
 
-double area(Point *P, int n) {//【任意多边形P的面积】
+//【任意多边形P的面积】,下标从0开始
+double area(Point *P, int n) {
     double S = 0;
     for (int i = 0; i < n; i++) S += det(P[i], P[(i + 1) % n]);
     return S * 0.5;
 }
 
+//多边形和圆的面积交 ，下表从0开始
 double pc_area(Point *p, int n, const Circle &c) {
     if (n < 3) return 0;
     function<double(Circle, Point, Point)> dfs = [&](Circle c, Point a, Point b) {
@@ -382,8 +413,9 @@ double pc_area(Point *p, int n, const Circle &c) {
 
 Line Q[N];
 
+//【半平面交】
 int judge(Line L, Point a) { return sgn(det(a - L.s, L.t - L.s)) > 0; }//判断点a是否在直线L的右边
-int halfcut(Line *L, int n, Point *P) {//【半平面交】
+int halfcut(Line *L, int n, Point *P) {
     sort(L, L + n, [](const Line &a, const Line &b) {
         double d = atan2((a.t - a.s).y, (a.t - a.s).x) - atan2((b.t - b.s).y, (b.t - b.s).x);
         return sgn(d) ? sgn(d) < 0 : judge(a, b.s);
@@ -412,7 +444,8 @@ int halfcut(Line *L, int n, Point *P) {//【半平面交】
 
 Point V1[N], V2[N];
 
-int mincowski(Point *P1, int n, Point *P2, int m, Point *V) {//【闵可夫斯基和】求两个凸包{P1},{P2}的向量集合{V}={P1+P2}构成的凸包
+//【闵可夫斯基和】求两个凸包{P1},{P2}的向量集合{V}={P1+P2}构成的凸包
+int mincowski(Point *P1, int n, Point *P2, int m, Point *V) {
     for (int i = 0; i < n; ++i) V1[i] = P1[(i + 1) % n] - P1[i];
     for (int i = 0; i < m; ++i) V2[i] = P2[(i + 1) % m] - P2[i];
     int t = 0, i = 0, j = 0;
@@ -423,7 +456,8 @@ int mincowski(Point *P1, int n, Point *P2, int m, Point *V) {//【闵可夫斯�
     return t;
 }
 
-Circle external_circle(const Point &A, const Point &B, const Point &C) {//【三点确定一圆】向量垂心法
+//【三点确定一圆】向量垂心法
+Circle external_circle(const Point &A, const Point &B, const Point &C) {
     Point P1 = (A + B) * 0.5, P2 = (A + C) * 0.5;
     Line R1 = Line(P1, P1 + orth(B - A));
     Line R2 = Line(P2, P2 + orth(C - A));
@@ -433,6 +467,7 @@ Circle external_circle(const Point &A, const Point &B, const Point &C) {//【三
     return O;
 }
 
+//三角形内接圆
 Circle internal_circle(const Point &A, const Point &B, const Point &C) {
     double a = dist(B, C), b = dist(A, C), c = dist(A, B);
     double s = (a + b + c) / 2;
@@ -442,7 +477,7 @@ Circle internal_circle(const Point &A, const Point &B, const Point &C) {
     return Circle((A * a + B * b + C * c) / (a + b + c), r);
 }
 
-
+//动态凸包
 struct ConvexHull {
 
     int op;
@@ -502,7 +537,8 @@ struct ConvexHull {
 
 int PIC(Circle C, Point a) { return sgn(length(a - C.o) - C.r) <= 0; }//判断点A是否在圆C内
 void Random(Point *P, int n) { for (int i = 0; i < n; ++i)swap(P[i], P[(rand() + 1) % n]); }//随机一个排列
-Circle min_circle(Point *P, int n) {//【求点集P的最小覆盖圆】 O(n)
+//【求点集P的最小覆盖圆】 O(n)
+Circle min_circle(Point *P, int n) {
 //  random_shuffle(P,P+n);
     Random(P, n);
     Circle C = Circle(P[0], 0);
@@ -521,6 +557,7 @@ Circle min_circle(Point *P, int n) {//【求点集P的最小覆盖圆】 O(n)
 
 int temp[N];
 
+//最近点对
 double closest_point(Point *p, int n) {
     function<double(int, int)> merge = [&](int l, int r) {
         double d = dinf;
@@ -554,7 +591,8 @@ double closest_point(Point *p, int n) {
     return merge(0, n - 1);
 }
 
-int tangent(const Circle &c1, const Point &p2, pair<Point, Point> &ans) { //圆和点切线
+//圆和点的切线
+int tangent(const Circle &c1, const Point &p2, pair<Point, Point> &ans) {
     Point tmp = c1.o - p2;
     int sta;
     if (sgn(norm(tmp) - c1.r * c1.r) < 0) return 0;
@@ -565,7 +603,8 @@ int tangent(const Circle &c1, const Point &p2, pair<Point, Point> &ans) { //圆�
     return sta;
 }
 
-int tangent(Circle c1, Circle c2, vector<Line> &ans) { //圆和点切线
+//圆和圆的切线
+int tangent(Circle c1, Circle c2, vector<Line> &ans) {
     ans.clear();
     if (sgn(c1.r - c2.r) < 0) swap(c1, c2);
     double g = norm(c1.o - c2.o);
@@ -586,7 +625,8 @@ int tangent(Circle c1, Circle c2, vector<Line> &ans) { //圆和点切线
     return ans.size();
 }
 
-double areaofCC(Circle c1, Circle c2) { //两圆面积交
+//两圆面积交
+double areaofCC(Circle c1, Circle c2) {
     if (c1.r > c2.r) swap(c1, c2);
     double nor = norm(c1.o - c2.o);
     double dist = sqrt(max(0.0, nor));
@@ -605,7 +645,8 @@ double areaofCC(Circle c1, Circle c2) { //两圆面积交
     return (theta1 - sin(theta1 + theta1) * 0.5) * c1.r * c1.r + (theta2 - sin(theta2 + theta2) * 0.5) * c2.r * c2.r;
 }
 
-
+//https://onlinejudge.u-aizu.ac.jp/courses/library/4/CGL/all/CGL_4_C
+//把凸包切一刀
 int convexCut(Point *p, Point *ans, int n, Line l) {
     int top = 0;
     for (int i = 0; i < n; i++) {
@@ -617,6 +658,7 @@ int convexCut(Point *p, Point *ans, int n, Line l) {
     return top;
 }
 
+//两球体积交
 double SphereCross(double d, double r1, double r2) {
     if (r1 < r2) swap(r1, r2);
     if (sgn(d - r1 - r2) >= 0) return 0;
