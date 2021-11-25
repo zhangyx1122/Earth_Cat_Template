@@ -1,4 +1,3 @@
-
 //#pragma GCC optimize(2)
 #include <bits/stdc++.h>
 
@@ -30,18 +29,18 @@ namespace Poly {
     //一般模数的原根为 2 3 5 7 10 6
     const int inv_G = qpow(G, mod - 2);
     int RR[N], inv[N];
-    int deer[2][22][N];
+//    int deer[2][22][N];
 
     void init(const int t) {//预处理出来NTT里需要的w和wn，砍掉了一个log的时间
-        for (int p = 1; p <= t; ++p) {
-            int buf1 = qpow(G, (mod - 1) / (1 << p));
-            int buf0 = qpow(inv_G, (mod - 1) / (1 << p));
-            deer[0][p][0] = deer[1][p][0] = 1;
-            for (int i = 1; i < (1 << p); ++i) {
-                deer[0][p][i] = 1ll * deer[0][p][i - 1] * buf0 % mod;//逆
-                deer[1][p][i] = 1ll * deer[1][p][i - 1] * buf1 % mod;
-            }
-        }
+//        for (int p = 1; p <= t; ++p) {
+//            int buf1 = qpow(G, (mod - 1) / (1 << p));
+//            int buf0 = qpow(inv_G, (mod - 1) / (1 << p));
+//            deer[0][p][0] = deer[1][p][0] = 1;
+//            for (int i = 1; i < (1 << p); ++i) {
+//                deer[0][p][i] = 1ll * deer[0][p][i - 1] * buf0 % mod;//逆
+//                deer[1][p][i] = 1ll * deer[1][p][i - 1] * buf1 % mod;
+//            }
+//        }
         inv[1] = 1;
         for (int i = 2; i <= (1 << t); ++i)
             inv[i] = 1ll * inv[mod % i] * (mod - mod / i) % mod;
@@ -56,7 +55,7 @@ namespace Poly {
     }
 
 //  省空间用
-//    int deer[2][N];
+    int deer[2][N];
 
     void NTT(poly &A, int type, int limit) {//快速数论变换
         A.resize(limit);
@@ -67,18 +66,18 @@ namespace Poly {
             int len = mid >> 1;
 
 //          省空间用
-//            int buf1 = qpow(G, (mod - 1) / (1 << j));
-//            int buf0 = qpow(inv_G, (mod - 1) / (1 << j));
-//            deer[0][0] = deer[1][0] = 1;
-//            for (int i = 1; i < (1 << j); ++i) {
-//                deer[0][i] = 1ll * deer[0][i - 1] * buf0 % mod;//逆
-//                deer[1][i] = 1ll * deer[1][i - 1] * buf1 % mod;
-//            }
+            int buf1 = qpow(G, (mod - 1) / (1 << j));
+            int buf0 = qpow(inv_G, (mod - 1) / (1 << j));
+            deer[0][0] = deer[1][0] = 1;
+            for (int i = 1; i < (1 << j); ++i) {
+                deer[0][i] = 1ll * deer[0][i - 1] * buf0 % mod;//逆
+                deer[1][i] = 1ll * deer[1][i - 1] * buf1 % mod;
+            }
 
             for (int pos = 0; pos < limit; pos += mid) {
-                int *wn = deer[type][j];
+//                int *wn = deer[type][j];
 //              省空间用
-//                int *wn = deer[type];
+                int *wn = deer[type];
                 for (int i = pos; i < pos + len; ++i, ++wn) {
                     int tmp = 1ll * (*wn) * A[i + len] % mod;
                     A[i + len] = ck(A[i] - tmp + mod);
@@ -173,6 +172,10 @@ namespace Poly {
     }
 
     poly poly_pow(poly f, int k) {//多项式快速幂
+        if(f.size()==1){
+            f[0] = qpow(f[0],k);
+            return f;
+        }
         f = poly_ln(f, f.size());
         for (auto &x: f) x = 1ll * x * k % mod;
         return poly_exp(f, f.size());
@@ -233,23 +236,3 @@ namespace Poly {
 }
 
 using namespace Poly;
-
-int solve(int n, int m, int k) {
-    poly a;
-    for (int i = 0; i <= k; i++) a.push_back(1);
-    a.resize(m + 1);
-    a = poly_pow(a, n - m + 1);
-    return a[m];
-}
-
-int main() {
-    init(20);
-    int n, m, k;
-    cin >> n >> m >> k;
-    ll ans = solve(n, m, k);
-//    cout << ans << endl;
-    if (k) {
-        ans = (ans + mod - solve(n, m, k - 1)) % mod;
-    }
-    cout << ans << endl;
-}
