@@ -1,4 +1,4 @@
-# BSGS
+#### BSGS
 
 求$a^t \equiv b ( \mod p)$ (a,p) = 1的最小的t
 
@@ -60,7 +60,7 @@ int main() {
 }
 ```
 
-# 扩展BSGS
+#### 扩展BSGS
 
 求$a^t \equiv b(\mod p)$ 的最小的t
 
