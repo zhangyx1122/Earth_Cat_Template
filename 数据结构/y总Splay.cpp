@@ -24,6 +24,7 @@ void pushdown(int x) {
     }
 }
 void rotate(int x) {
+	pushdown(x); 
     int y = tr[x].p, z = tr[y].p;
     int k = tr[y].s[1] == x;
     tr[y].s[k] = tr[x].s[k ^ 1], tr[tr[y].s[k]].p = y;
