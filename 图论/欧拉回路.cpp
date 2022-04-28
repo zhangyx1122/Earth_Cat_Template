@@ -12,7 +12,7 @@ struct edge {
 
 vector<edge> g[N];
 
-namespace Euler1 {  //有向图欧拉回路
+namespace Euler1 {  //无向图欧拉回路
     bool vis[N];
     int cur[N];
 
@@ -44,7 +44,7 @@ namespace Euler1 {  //有向图欧拉回路
     }
 }  // namespace Euler1
 
-namespace Euler2 {  // 无向图欧拉回路
+namespace Euler2 {  // 有向图欧拉回路
     int deg[N], cur[N];
 
     void dfs(int u, const int &w) {
