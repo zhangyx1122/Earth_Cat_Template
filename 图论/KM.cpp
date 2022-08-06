@@ -1,17 +1,17 @@
 #include<bits/stdc++.h>
 
 using namespace std;
-typedef long long ll;
-const ll maxN = 310;
-const ll INF = 1e16;
 
-struct KM {
-    ll mp[maxN][maxN], link_x[maxN], link_y[maxN], N;
+const int inf = 0x3f3f3f3f;
+const int maxN = 505;
+
+namespace KM {
+    int mp[maxN][maxN], link_x[maxN], link_y[maxN], N;
     bool visx[maxN], visy[maxN];
-    ll que[maxN << 1], top, fail, pre[maxN];
-    ll hx[maxN], hy[maxN], slk[maxN];
+    int que[maxN << 1], top, fail, pre[maxN];
+    int hx[maxN], hy[maxN], slk[maxN];
 
-    inline ll check(ll i) {
+    inline int check(int i) {
         visx[i] = true;
         if (link_x[i]) {
             que[fail++] = link_x[i];
@@ -24,9 +24,9 @@ struct KM {
         return 0;
     }
 
-    void bfs(ll S) {
-        for (ll i = 1; i <= N; i++) {
-            slk[i] = INF;
+    void bfs(int S) {
+        for (int i = 1; i <= N; i++) {
+            slk[i] = inf;
             visx[i] = visy[i] = false;
         }
         top = 0;
@@ -34,9 +34,9 @@ struct KM {
         que[0] = S;
         visy[S] = true;
         while (true) {
-            ll d;
+            int d;
             while (top < fail) {
-                for (ll i = 1, j = que[top++]; i <= N; i++) {
+                for (int i = 1, j = que[top++]; i <= N; i++) {
                     if (!visx[i] && slk[i] >= (d = hx[i] + hy[j] - mp[i][j])) {
                         pre[i] = j;
                         if (d) slk[i] = d;
@@ -44,56 +44,63 @@ struct KM {
                     }
                 }
             }
-            d = INF;
-            for (ll i = 1; i <= N; i++) {
+            d = inf;
+            for (int i = 1; i <= N; i++) {
                 if (!visx[i] && d > slk[i]) d = slk[i];
             }
-            for (ll i = 1; i <= N; i++) {
+            for (int i = 1; i <= N; i++) {
                 if (visx[i]) hx[i] += d;
                 else slk[i] -= d;
                 if (visy[i]) hy[i] -= d;
             }
-            for (ll i = 1; i <= N; i++) {
+            for (int i = 1; i <= N; i++) {
                 if (!visx[i] && !slk[i] && !check(i)) return;
             }
         }
     }
 
-    void init() {
-        for (ll i = 1; i <= N; i++) {
+    void prework() {
+        for (int i = 1; i <= N; i++) {
             link_x[i] = link_y[i] = 0;
             visy[i] = false;
         }
-        for (ll i = 1; i <= N; i++) {
+        for (int i = 1; i <= N; i++) {
             hx[i] = 0;
-            for (ll j = 1; j <= N; j++) {
+            for (int j = 1; j <= N; j++) {
                 if (hx[i] < mp[i][j]) hx[i] = mp[i][j];
             }
         }
     }
-} km;
+
+    void init(int n) {
+        N = n;
+        top = fail = 0;
+        for (int i = 1; i <= N; i++) {
+            link_x[i] = link_y[i] = visx[i] = visy[i] = pre[i] = hx[i] = hy[i] = slk[i] = 0;
+            for (int j = 1; j <= N; j++) {
+                mp[i][j] = 0;
+            }
+        }
+    }
+}
 
 int main() {
-    ios::sync_with_stdio(0);
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
 
-    ll n;
-    cin >> n;
-    ll ans = 0;
+    int n, m;
+    cin >> n >> m;
+    KM::init(max(n, m));
     for (int i = 1; i <= n; i++) {
-        ll a, b, c, d;
-        cin >> a >> b >> c >> d;
-        ans += a * a + b * b;
-        for (int j = 1; j <= n; j++) {
-            km.mp[i][j] = -(c + d * (j - 1)) * (c + d * (j - 1));
-//            cout << -km.mp[i][j] << ' ';
-//            cin >> km.mp[i][j];
-//            km.mp[i][j] = -km.mp[i][j];
+        for (int j = 1; j <= m; j++) {
+            cin >> KM::mp[i][j];
         }
-//        cout << endl;
     }
-    km.N = n;
-    km.init();
-    for (int i = 1; i <= km.N; i++) km.bfs(i);
-    for (int i = 1; i <= n; i++) ans -= km.mp[i][km.link_x[i]];
-    cout << ans << endl;
+    KM::prework();
+    int ans = 0;
+    for (int i = 1; i <= KM::N; i++) KM::bfs(i);
+    for (int i = 1; i <= KM::N; i++) ans += KM::mp[i][KM::link_x[i]];
+
 }
+
